@@ -1,5 +1,5 @@
 [package]
-name = "data-boi"
+name = "tomlato"
 version = "0.1.0"
 authors = ["rust"]
 edition = "2018"
