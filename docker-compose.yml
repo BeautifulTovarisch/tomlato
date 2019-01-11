@@ -1,0 +1,15 @@
+version: "3.7"
+services:
+  rust:
+    tty: true
+    env_file: .env
+    build:
+      context: .
+    volumes:
+      - ./:/workdir
+      - ./docker-entrypoint.sh:/docker-entrypoint.sh
+
+      - crates:/usr/local/cargo
+
+volumes:
+  crates:
