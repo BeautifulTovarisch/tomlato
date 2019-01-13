@@ -19,16 +19,16 @@ enum Grammar {
     Backspace,
     Backslash,
 
-    // Values
-    CharLiteral( char )
+    Identifier( String )
 }
 
 #[derive(Debug)]
-struct Token { character: Grammar }
+pub struct Token { character: Grammar }
 
 // All we care about is the particular Grammar so this will satisfy PartialEq
 impl PartialEq<Grammar> for Token {
     fn eq( &self, other: &Grammar ) -> bool {
+
         match( &self.character, other ) {
             ( &Grammar::Dot, &Grammar::Dot ) => true,
             ( &Grammar::Space, &Grammar::Space ) => true,
@@ -45,13 +45,19 @@ impl PartialEq<Grammar> for Token {
             ( &Grammar::FormFeed, &Grammar::FormFeed ) => true,
             ( &Grammar::Backspace, &Grammar::Backspace ) => true,
             ( &Grammar::Backslash, &Grammar::Backslash ) => true,
-            ( &Grammar::CharLiteral( c1 ), &Grammar::CharLiteral( c2 ) ) => c1 == c2,
+            ( &Grammar::Identifier( ref id ), &Grammar::Identifier( ref id2 ) ) => *id == *id2,
             ( _, _ ) => false
         }
     }
 }
 
-fn tokenize( input: char ) -> Token {
+pub fn identify( input: Vec<char> ) -> Token {
+    Token { character: Grammar::Identifier( input.into_iter().collect() ) }
+}
+
+// Single character tokenization
+
+pub fn tokenize( input: char ) -> Token {
     match input {
         '.' => Token { character: Grammar::Dot },
         ' ' => Token { character: Grammar::Space },
@@ -63,7 +69,6 @@ fn tokenize( input: char ) -> Token {
         '\n' => Token { character: Grammar::LineFeed },
         '[' => Token { character: Grammar::LeftBracket },
         ']' => Token { character: Grammar::RightBracket },
-
         '\t' => Token { character: Grammar::Tab },
         '\x08' => Token { character: Grammar::Backspace },
         _ => panic!( "Invalid Token \'{}\'", input )

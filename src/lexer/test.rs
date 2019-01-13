@@ -1,4 +1,4 @@
-use super::{ Token, Grammar, tokenize };
+use super::{ Token, Grammar, tokenize, identify };
 
 #[test]
 fn test_dot() {
@@ -55,17 +55,9 @@ fn test_backspace() {
 }
 
 #[test]
-fn test_char_literal() {
-
+fn identifier() {
+    assert_eq!( identify( vec![ 'k', 'e', 'y' ] ), Grammar::Identifier( String::from( "key" ) ) )
 }
-// #[test]
-// #[test]
-// #[test]
-// #[test]
-// #[test]
-// #[test]
-// #[test]
-// #[test]
 
 #[test]
 fn test_line_feed() {

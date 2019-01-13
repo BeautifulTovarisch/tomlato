@@ -4,6 +4,8 @@ use structopt::StructOpt;
 
 mod lexer;
 
+use crate::lexer::{ tokenize, identify };
+
 #[derive(StructOpt)]
 struct Arg {
     #[structopt(parse(from_os_str))]
@@ -12,6 +14,4 @@ struct Arg {
 
 fn main() {
     let Arg { path } = Arg::from_args();
-
-
 }
