@@ -4,7 +4,7 @@ use structopt::StructOpt;
 
 mod lexer;
 
-use crate::lexer::{ tokenize, identify };
+use crate::lexer::{ tokenize };
 
 #[derive(StructOpt)]
 struct Arg {

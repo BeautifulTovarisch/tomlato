@@ -1,5 +1,5 @@
 #[derive(Debug)]
-enum Grammar {
+pub enum Grammar {
     // General Grammar
     Dot,
     Space,
@@ -19,60 +19,67 @@ enum Grammar {
     Backspace,
     Backslash,
 
+    Character( char ),
     Identifier( String )
 }
 
-#[derive(Debug)]
-pub struct Token { character: Grammar }
-
 // All we care about is the particular Grammar so this will satisfy PartialEq
-impl PartialEq<Grammar> for Token {
+impl PartialEq for Grammar {
     fn eq( &self, other: &Grammar ) -> bool {
 
-        match( &self.character, other ) {
-            ( &Grammar::Dot, &Grammar::Dot ) => true,
-            ( &Grammar::Space, &Grammar::Space ) => true,
-            ( &Grammar::Equals, &Grammar::Equals ) => true,
-            ( &Grammar::LeftBrace, &Grammar::LeftBrace ) => true,
-            ( &Grammar::RightBrace, &Grammar::RightBrace ) => true,
-            ( &Grammar::DoubleQuote, &Grammar::DoubleQuote ) => true,
-            ( &Grammar::SingleQuote, &Grammar::SingleQuote ) => true,
-            ( &Grammar::LeftBracket, &Grammar::LeftBracket ) => true,
-            ( &Grammar::RightBracket, &Grammar::RightBracket ) => true,
-            ( &Grammar::Tab, &Grammar::Tab ) => true,
-            ( &Grammar::Quote, &Grammar::Quote ) => true,
-            ( &Grammar::LineFeed, &Grammar::LineFeed ) => true,
-            ( &Grammar::FormFeed, &Grammar::FormFeed ) => true,
-            ( &Grammar::Backspace, &Grammar::Backspace ) => true,
-            ( &Grammar::Backslash, &Grammar::Backslash ) => true,
-            ( &Grammar::Identifier( ref id ), &Grammar::Identifier( ref id2 ) ) => *id == *id2,
+        match( &self, other ) {
+            ( Grammar::Dot, Grammar::Dot ) => true,
+            ( Grammar::Space, Grammar::Space ) => true,
+            ( Grammar::Equals, Grammar::Equals ) => true,
+            ( Grammar::LeftBrace, Grammar::LeftBrace ) => true,
+            ( Grammar::RightBrace, Grammar::RightBrace ) => true,
+            ( Grammar::DoubleQuote, Grammar::DoubleQuote ) => true,
+            ( Grammar::SingleQuote, Grammar::SingleQuote ) => true,
+            ( Grammar::LeftBracket, Grammar::LeftBracket ) => true,
+            ( Grammar::RightBracket, Grammar::RightBracket ) => true,
+            ( Grammar::Tab, Grammar::Tab ) => true,
+            ( Grammar::Quote, Grammar::Quote ) => true,
+            ( Grammar::LineFeed, Grammar::LineFeed ) => true,
+            ( Grammar::FormFeed, Grammar::FormFeed ) => true,
+            ( Grammar::Backspace, Grammar::Backspace ) => true,
+            ( Grammar::Backslash, Grammar::Backslash ) => true,
+            ( Grammar::Character( c1 ), Grammar::Character( c2 ) ) => c1 == c2,
+            ( Grammar::Identifier( ref id ), Grammar::Identifier( ref id2 ) ) => *id == *id2,
             ( _, _ ) => false
         }
     }
 }
 
-pub fn identify( input: Vec<char> ) -> Token {
-    Token { character: Grammar::Identifier( input.into_iter().collect() ) }
+fn identify( input: Vec<char> ) -> Grammar {
+    Grammar::Identifier( input.into_iter().collect() )
 }
 
 // Single character tokenization
 
-pub fn tokenize( input: char ) -> Token {
+fn characterize( input: char ) -> Grammar {
     match input {
-        '.' => Token { character: Grammar::Dot },
-        ' ' => Token { character: Grammar::Space },
-        '=' => Token { character: Grammar::Equals },
-        '{' => Token { character: Grammar::LeftBrace },
-        '}' => Token { character: Grammar::RightBrace },
-        '"' => Token { character: Grammar::DoubleQuote },
-        '\'' => Token { character: Grammar::SingleQuote },
-        '\n' => Token { character: Grammar::LineFeed },
-        '[' => Token { character: Grammar::LeftBracket },
-        ']' => Token { character: Grammar::RightBracket },
-        '\t' => Token { character: Grammar::Tab },
-        '\x08' => Token { character: Grammar::Backspace },
+        '.' => Grammar::Dot,
+        ' ' => Grammar::Space,
+        '=' => Grammar::Equals,
+        '{' => Grammar::LeftBrace,
+        '}' => Grammar::RightBrace,
+        '"' => Grammar::DoubleQuote,
+        '\'' => Grammar::SingleQuote,
+        '\n' => Grammar::LineFeed,
+        '[' => Grammar::LeftBracket,
+        ']' => Grammar::RightBracket,
+        '\t' => Grammar::Tab,
+        '\x08' => Grammar::Backspace,
+        'a'...'z' => Grammar::Character( input ),
+        'A'...'Z' => Grammar::Character( input ),
         _ => panic!( "Invalid Token \'{}\'", input )
     }
+}
+
+pub fn tokenize( toml: &str ) -> Vec<Grammar> {
+    toml.chars().enumerate().map( | ( i, c ) | {
+        characterize( c )
+    }).collect()
 }
 
 #[cfg(test)]
