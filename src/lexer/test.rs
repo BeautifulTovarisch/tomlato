@@ -73,33 +73,28 @@ fn test_line_feed() {
 #[test]
 fn test_tokenize() {
     use super::Grammar::*;
-    
-    let toml = "title = \"TOML Example\"";
+
+    let toml = ". ={}\"'\
+[]\t\x08\x0C\\abc";
 
     let expected = vec![
-        Character( 't' ),
-        Character( 'i' ),
-        Character( 't' ),
-        Character( 'l' ),
-        Character( 'e' ),
+        Dot,
         Space,
         Equals,
-        Space,
+        LeftBrace,
+        RightBrace,
         DoubleQuote,
-        Character( 'T' ),
-        Character( 'O' ),
-        Character( 'M' ),
-        Character( 'L' ),
-        Space,
-        Character( 'E' ),
-        Character( 'x' ),
+        SingleQuote,
+        LeftBracket,
+        RightBracket,
+        Tab,
+        Backspace,
+        FormFeed,
+        Backslash,
         Character( 'a' ),
-        Character( 'm' ),
-        Character( 'p' ),
-        Character( 'l' ),
-        Character( 'e' ),
-        DoubleQuote
+        Character( 'b' ),
+        Character( 'c' )
     ];
 
-    assert_eq!( expected, tokenize( toml ) );
+    assert_eq!( tokenize( toml ), expected );
 }

@@ -13,7 +13,6 @@ pub enum Grammar {
 
     // Escape characters
     Tab,
-    Quote,
     LineFeed,
     FormFeed,
     Backspace,
@@ -38,7 +37,6 @@ impl PartialEq for Grammar {
             ( Grammar::LeftBracket, Grammar::LeftBracket ) => true,
             ( Grammar::RightBracket, Grammar::RightBracket ) => true,
             ( Grammar::Tab, Grammar::Tab ) => true,
-            ( Grammar::Quote, Grammar::Quote ) => true,
             ( Grammar::LineFeed, Grammar::LineFeed ) => true,
             ( Grammar::FormFeed, Grammar::FormFeed ) => true,
             ( Grammar::Backspace, Grammar::Backspace ) => true,
@@ -65,21 +63,20 @@ fn characterize( input: char ) -> Grammar {
         '}' => Grammar::RightBrace,
         '"' => Grammar::DoubleQuote,
         '\'' => Grammar::SingleQuote,
-        '\n' => Grammar::LineFeed,
         '[' => Grammar::LeftBracket,
         ']' => Grammar::RightBracket,
-        '\t' => Grammar::Tab,
+        '\\' => Grammar::Backslash,
+        '\x0A' => Grammar::LineFeed,
+        '\x0C' => Grammar::FormFeed,
         '\x08' => Grammar::Backspace,
-        'a'...'z' => Grammar::Character( input ),
-        'A'...'Z' => Grammar::Character( input ),
+        '\x09' => Grammar::Tab,
+        'A'...'z' => Grammar::Character( input ),
         _ => panic!( "Invalid Token \'{}\'", input )
     }
 }
 
 pub fn tokenize( toml: &str ) -> Vec<Grammar> {
-    toml.chars().enumerate().map( | ( i, c ) | {
-        characterize( c )
-    }).collect()
+    toml.chars().map( characterize ).collect()
 }
 
 #[cfg(test)]
