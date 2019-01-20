@@ -56,12 +56,7 @@ fn test_backspace() {
 }
 
 #[test]
-fn character() {
-    assert_eq!( characterize( 't' ), Grammar::Character( 't' ) );
-}
-
-#[test]
-fn identifier() {
+fn test_identifier() {
     assert_eq!( identify( vec![ 'k', 'e', 'y' ] ), Grammar::Identifier( String::from( "key" ) ) )
 }
 
@@ -91,9 +86,8 @@ fn test_tokenize() {
         Backspace,
         FormFeed,
         Backslash,
-        Character( 'a' ),
-        Character( 'b' ),
-        Character( 'c' )
+        Identifier( String::from( "abc" ) ),
+        EOF
     ];
 
     assert_eq!( tokenize( toml ), expected );

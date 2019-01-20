@@ -18,8 +18,8 @@ pub enum Grammar {
     Backspace,
     Backslash,
 
-    Character( char ),
-    Identifier( String )
+    Identifier( String ),
+    EOF
 }
 
 // All we care about is the particular Grammar so this will satisfy PartialEq
@@ -41,8 +41,8 @@ impl PartialEq for Grammar {
             ( Grammar::FormFeed, Grammar::FormFeed ) => true,
             ( Grammar::Backspace, Grammar::Backspace ) => true,
             ( Grammar::Backslash, Grammar::Backslash ) => true,
-            ( Grammar::Character( c1 ), Grammar::Character( c2 ) ) => c1 == c2,
             ( Grammar::Identifier( ref id ), Grammar::Identifier( ref id2 ) ) => *id == *id2,
+            ( Grammar::EOF, Grammar::EOF ) => true,
             ( _, _ ) => false
         }
     }
@@ -70,13 +70,31 @@ fn characterize( input: char ) -> Grammar {
         '\x0C' => Grammar::FormFeed,
         '\x08' => Grammar::Backspace,
         '\x09' => Grammar::Tab,
-        'A'...'z' => Grammar::Character( input ),
         _ => panic!( "Invalid Token \'{}\'", input )
     }
 }
 
 pub fn tokenize( toml: &str ) -> Vec<Grammar> {
-    toml.chars().map( characterize ).collect()
+    let mut tokens: Vec<Grammar> = Vec::new();
+
+    let mut characters = toml.chars().peekable();
+
+    while let Some( c ) = characters.peek() {
+        if c.is_alphanumeric() {
+            let words: Vec<char> = characters.clone()
+                .take_while( |c| { characters.next(); !c.is_whitespace() } )
+                .collect();
+            tokens.push( identify( words ) );
+
+        } else {
+            tokens.push( characterize( *c ) );
+        }
+        characters.next();
+    }
+
+    tokens.push( Grammar::EOF );
+
+    tokens
 }
 
 #[cfg(test)]
