@@ -52,8 +52,17 @@ fn identify( input: Vec<char> ) -> Grammar {
     Grammar::Identifier( input.into_iter().collect() )
 }
 
-// Single character tokenization
+fn scan_identifier<'a, I>( characters: &mut I ) -> Grammar
+    where I: Iterator<Item = char>
+{
+    identify(
+        characters
+            .take_while( |c| { !c.is_whitespace() } )
+            .collect()
+    )
+}
 
+// Single character tokenization
 fn characterize( input: char ) -> Grammar {
     match input {
         '.' => Grammar::Dot,
@@ -81,10 +90,7 @@ pub fn tokenize( toml: &str ) -> Vec<Grammar> {
 
     while let Some( c ) = characters.peek() {
         if c.is_alphanumeric() {
-            let words: Vec<char> = characters.clone()
-                .take_while( |c| { characters.next(); !c.is_whitespace() } )
-                .collect();
-            tokens.push( identify( words ) );
+            tokens.push( scan_identifier( &mut characters ) );
 
         } else {
             tokens.push( characterize( *c ) );
