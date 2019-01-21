@@ -48,18 +48,33 @@ impl PartialEq for Grammar {
     }
 }
 
-fn identify( input: Vec<char> ) -> Grammar {
-    Grammar::Identifier( input.into_iter().collect() )
+fn valid_in_identifier( character: char ) -> bool {
+    match character {
+        '-' => true,
+        '_' => true,
+        c if c.is_alphanumeric() => true,
+        _ => false
+    }
 }
 
-fn scan_identifier<'a, I>( characters: &mut I ) -> Grammar
+fn scan_identifier<'a, I>( characters: &mut I ) -> Vec<Grammar>
     where I: Iterator<Item = char>
 {
-    identify(
-        characters
-            .take_while( |c| { !c.is_whitespace() } )
-            .collect()
-    )
+    let mut tokens: Vec<Grammar> = Vec::with_capacity( 2 );
+
+    let identifier: Vec<char> = characters
+        .take_while( |c| {
+            if !valid_in_identifier( *c ) {
+                tokens.push( characterize( *c ) )
+            }
+           valid_in_identifier( *c )
+        }).collect();
+
+    let identifier: Grammar = Grammar::Identifier( identifier.into_iter().collect() );
+
+    tokens.insert( 0, identifier );
+
+    tokens
 }
 
 // Single character tokenization
@@ -90,12 +105,11 @@ pub fn tokenize( toml: &str ) -> Vec<Grammar> {
 
     while let Some( c ) = characters.peek() {
         if c.is_alphanumeric() {
-            tokens.push( scan_identifier( &mut characters ) );
-
+            tokens.append( &mut scan_identifier( &mut characters ) );
         } else {
             tokens.push( characterize( *c ) );
+            characters.next();
         }
-        characters.next();
     }
 
     tokens.push( Grammar::EOF );
