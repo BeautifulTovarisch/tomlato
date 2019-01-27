@@ -1,4 +1,11 @@
-use super::{ Grammar, tokenize, characterize, scan_identifier };
+use super::{
+    Grammar,
+    tokenize,
+    characterize,
+    scan_identifier,
+    valid_in_identifier
+};
+
 #[test]
 fn test_characterize() {
     assert_eq!( characterize( '.' ), Grammar::Dot );
@@ -13,6 +20,28 @@ fn test_characterize() {
     assert_eq!( characterize( '\t' ), Grammar::Tab );
     assert_eq!( characterize( '\x08' ), Grammar::Backspace );
     assert_eq!( characterize( '\n' ), Grammar::LineFeed );
+}
+
+#[test]
+fn test_valid_in_identifier() {
+    assert!( valid_in_identifier( '_' ) );
+    assert!( valid_in_identifier( '-' ) );
+
+    assert!( valid_in_identifier( 'A' ) );
+    assert!( valid_in_identifier( '藏' ) );
+    assert!( valid_in_identifier( 'ڲ' ) );
+
+    assert_eq!( valid_in_identifier( '~' ), false );
+    assert_eq!( valid_in_identifier( '`' ), false );
+    assert_eq!( valid_in_identifier( '!' ), false );
+    assert_eq!( valid_in_identifier( '@' ), false );
+    assert_eq!( valid_in_identifier( '#' ), false );
+    assert_eq!( valid_in_identifier( '$' ), false );
+    assert_eq!( valid_in_identifier( '%' ), false );
+    assert_eq!( valid_in_identifier( '^' ), false );
+    assert_eq!( valid_in_identifier( '&' ), false );
+
+    // You get the picture...
 }
 
 #[test]

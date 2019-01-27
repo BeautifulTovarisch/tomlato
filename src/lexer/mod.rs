@@ -18,6 +18,8 @@ pub enum Grammar {
     Backspace,
     Backslash,
 
+    StringLiteral,
+    NumberLiteral,
     Identifier( String ),
     EOF
 }
@@ -104,7 +106,7 @@ pub fn tokenize( toml: &str ) -> Vec<Grammar> {
     let mut characters = toml.chars().peekable();
 
     while let Some( c ) = characters.peek() {
-        if c.is_alphanumeric() {
+        if valid_in_identifier( *c ) {
             tokens.append( &mut scan_identifier( &mut characters ) );
         } else {
             tokens.push( characterize( *c ) );
