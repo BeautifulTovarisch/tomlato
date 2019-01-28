@@ -3,7 +3,8 @@ use super::{
     tokenize,
     characterize,
     scan_identifier,
-    valid_in_identifier
+    valid_in_identifier,
+    scan_string_literal
 };
 
 #[test]
@@ -31,6 +32,7 @@ fn test_valid_in_identifier() {
     assert!( valid_in_identifier( '藏' ) );
     assert!( valid_in_identifier( 'ڲ' ) );
 
+    assert_eq!( valid_in_identifier( '"' ), false );
     assert_eq!( valid_in_identifier( '~' ), false );
     assert_eq!( valid_in_identifier( '`' ), false );
     assert_eq!( valid_in_identifier( '!' ), false );
@@ -40,6 +42,8 @@ fn test_valid_in_identifier() {
     assert_eq!( valid_in_identifier( '%' ), false );
     assert_eq!( valid_in_identifier( '^' ), false );
     assert_eq!( valid_in_identifier( '&' ), false );
+
+    assert_eq!( valid_in_identifier( '\'' ), false );
 
     // You get the picture...
 }
@@ -65,6 +69,45 @@ fn test_scan_identifier() {
     assert_eq!(
         scan_identifier( &mut characters ),
         vec![ Grammar::Identifier( String::from( "third_variable" ) ), Grammar::Dot ]
+    );
+
+    let mut characters = "nested.variable".chars();
+
+    assert_eq!(
+        scan_identifier( &mut characters ),
+        vec![ Grammar::Identifier( String::from( "nested" ) ), Grammar::Dot ]
+    );
+
+    assert_eq!(
+        scan_identifier( &mut characters ),
+        vec![ Grammar::Identifier( String::from( "variable" ) ) ]
+    );
+}
+
+#[test]
+fn test_scan_string_literal() {
+    let mut characters = "\"Some String Literal\"".chars();
+
+    assert_eq!(
+        scan_string_literal( '"', &mut characters ),
+        Grammar::StringLiteral( String::from( "Some String Literal" ) )
+    );
+
+    let mut characters = r#"String literal containing comment - #"#.chars();
+
+    assert_eq!(
+        scan_string_literal( '"', &mut characters ),
+        Grammar::StringLiteral( String::from( "String literal containing comment - #" ) )
+    );
+
+
+    // Separate groups of StringLiterals between " or '
+    // e.g [ Grammar::DoubleQuote, StringLiteral, StringLiteral, Grammar::DoubleQuote ]
+    let mut characters = r#" And when \"'s are in the string, along with # \"#.chars();
+
+    assert_eq!(
+        scan_string_literal( '"', &mut characters ),
+        Grammar::StringLiteral( String::from( " And when \"'s are in the string, along with # \"" ) )
     );
 }
 

@@ -18,7 +18,7 @@ pub enum Grammar {
     Backspace,
     Backslash,
 
-    StringLiteral,
+    StringLiteral( String ),
     NumberLiteral,
     Identifier( String ),
     EOF
@@ -44,6 +44,8 @@ impl PartialEq for Grammar {
             ( Grammar::Backspace, Grammar::Backspace ) => true,
             ( Grammar::Backslash, Grammar::Backslash ) => true,
             ( Grammar::Identifier( ref id ), Grammar::Identifier( ref id2 ) ) => *id == *id2,
+            ( Grammar::StringLiteral( ref str1 ), Grammar::StringLiteral( ref str2 ) ) =>
+                *str1 == *str2,
             ( Grammar::EOF, Grammar::EOF ) => true,
             ( _, _ ) => false
         }
@@ -59,7 +61,7 @@ fn valid_in_identifier( character: char ) -> bool {
     }
 }
 
-fn scan_identifier<'a, I>( characters: &mut I ) -> Vec<Grammar>
+fn scan_identifier<I>( characters: &mut I ) -> Vec<Grammar>
     where I: Iterator<Item = char>
 {
     let mut tokens: Vec<Grammar> = Vec::with_capacity( 2 );
@@ -77,6 +79,23 @@ fn scan_identifier<'a, I>( characters: &mut I ) -> Vec<Grammar>
     tokens.insert( 0, identifier );
 
     tokens
+}
+
+// We pass in the beginning quote ( ' or " ) to serve as the stopping point
+fn scan_string_literal<I>( end_char: char, characters: &mut I ) -> Grammar
+    where I: Iterator<Item = char>
+{
+
+    let literal: Vec<char> = characters
+        .enumerate()
+        .take_while( | ( index, character  ) | {
+            *character != end_char || *index == 0
+        })
+        .map( | ( _, character ) | character )
+        .filter( | character | *character != end_char )
+        .collect();
+
+    Grammar::StringLiteral( "".to_string() )
 }
 
 // Single character tokenization
@@ -108,6 +127,11 @@ pub fn tokenize( toml: &str ) -> Vec<Grammar> {
     while let Some( c ) = characters.peek() {
         if valid_in_identifier( *c ) {
             tokens.append( &mut scan_identifier( &mut characters ) );
+
+        } else if *c == '"' || *c == '\'' {
+            tokens.push( characterize( *c ) );
+            characters.next();
+
         } else {
             tokens.push( characterize( *c ) );
             characters.next();
